@@ -1,2 +1,6 @@
 kubeadm token create --print-join-command
 #run in master node and copy same to slave
+
+
+root@k8s-master-1:~# kubectl label node k8s-worker-2 node-role. kubernetes.io/worker-worker
+#to rename nodes
