@@ -1,0 +1,6 @@
+cat / etc/kubernetes/ admin. conf
+
+  #from master
+
+  to local pc
+vi ~/.kube/config
