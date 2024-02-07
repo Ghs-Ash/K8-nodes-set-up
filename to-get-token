@@ -1,0 +1,2 @@
+kubeadm token create --print-join-command
+#run in master node and copy same to slave
