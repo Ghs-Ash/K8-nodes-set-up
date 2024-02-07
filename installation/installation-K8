@@ -1,1 +1,62 @@
+Certainly! For setting up a basic Kubernetes cluster with one master and one worker (node) on machines in the same network, you can use `kubeadm`. Below are the high-level steps:
 
+### On the Master Node:
+
+1. **Install Docker:**
+    ```bash
+    sudo apt-get update
+    sudo apt-get install -y docker.io
+    sudo systemctl enable docker
+    sudo systemctl start docker
+    ```
+
+2. **Install kubeadm, kubelet, and kubectl:**
+    ```bash
+    sudo apt-get update && sudo apt-get install -y apt-transport-https curl
+    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+    echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+    sudo apt-get update
+    sudo apt-get install -y kubelet kubeadm kubectl
+    ```
+
+3. **Initialize Kubernetes on the Master Node:**
+    ```bash
+    sudo kubeadm init --pod-network-cidr=192.168.0.0/16  # Use a CIDR suitable for your network
+    ```
+
+4. **Configure kubectl:**
+    ```bash
+    mkdir -p $HOME/.kube
+    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    sudo chown $(id -u):$(id -g) $HOME/.kube/config
+    ```
+
+5. **Install a Pod Network (e.g., Calico):**
+    ```bash
+    kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+    ```
+
+6. **Get the join command:**
+    ```bash
+    kubeadm token create --print-join-command
+    ```
+    Save the output of the above command; you will use it on the worker node.
+
+### On the Worker (Node) Machine:
+
+1. **Install Docker, kubeadm, kubelet, and kubectl (same as Master Node steps 1 and 2).**
+
+2. **Join the Cluster (Use the join command from the Master Node):**
+    ```bash
+    sudo kubeadm join <master-node-ip>:<master-node-port> --token <token> --discovery-token-ca-cert-hash <hash>
+    ```
+    Replace `<master-node-ip>`, `<master-node-port>`, `<token>`, and `<hash>` with the appropriate values obtained from the master node.
+
+### Back on the Master Node:
+
+Verify that the nodes are part of the cluster:
+```bash
+kubectl get nodes
+```
+
+That's it! You now have a basic Kubernetes cluster with one master and one worker node. Adjust network CIDRs, ports, and other parameters based on your specific requirements.
